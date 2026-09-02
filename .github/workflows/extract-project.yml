@@ -36,7 +36,9 @@ jobs:
           cp -a extracted/aproj/. .
 
           rm -rf extracted
-          rm -f AI_Physics_Helper_FINAL_CLOUD.zip
+
+          # Keep GitHub workflow files unchanged
+          git restore .github
 
       - name: Commit extracted project
         run: |
