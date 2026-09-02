@@ -42,7 +42,7 @@ jobs:
 
       - name: Commit extracted project
         run: |
-          if git diff --quiet; then
+          if git diff --quiet && [ -z "$(git status --porcelain)" ]; then
             echo "No changes to commit."
             exit 0
           fi
@@ -51,5 +51,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add -A
+          git restore --staged .github
+          git add .github
+
           git commit -m "Extract AI Physics Helper project"
           git push
