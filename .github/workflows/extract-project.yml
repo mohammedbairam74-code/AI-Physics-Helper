@@ -24,12 +24,12 @@ jobs:
             exit 0
           fi
 
-          test -f AI_Physics_Helper_FINAL_CLOUD.zip
+          test -f AI_Physics_Helper_FINAL_RELEASE.zip
 
           rm -rf extracted
           mkdir extracted
 
-          unzip -q AI_Physics_Helper_FINAL_CLOUD.zip -d extracted
+          unzip -q AI_Physics_Helper_FINAL_RELEASE.zip -d extracted
 
           test -d extracted/aproj
 
