@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Physics Helper V2</title>
+<style>
+body{margin:0;background:#08111f;color:#eef4ff;font-family:system-ui}
+main{max-width:1000px;margin:auto;padding:28px}
+.card{background:#111d31;border:1px solid #263752;border-radius:18px;padding:20px;margin:16px 0}
+textarea{width:100%;min-height:130px;box-sizing:border-box;background:#091321;color:#fff;border:1px solid #38506f;border-radius:12px;padding:14px;font-size:16px}
+button{border:0;border-radius:12px;padding:12px 20px;margin-top:10px;cursor:pointer}
+.answer{white-space:pre-wrap;line-height:1.9}
+.source{padding:10px 0;border-top:1px solid #263752}
+a{color:#8ec5ff}
+</style></head><body><main>
+<h1>🔬 AI Physics Helper <small>V2</small></h1>
+<div class="card">
+<textarea id="q" placeholder="اسأل أي سؤال في الفيزياء..."></textarea>
+<button onclick="ask()">اسأل 🧠</button>
+<input id="img" type="file" accept="image/*" style="margin-top:14px">
+<button onclick="imageSolve()">حل صورة المسألة 📷</button>
+</div>
+<div id="out"></div>
+<script>
+const qs=new URLSearchParams(location.search); const API_BASE = qs.get("api") || localStorage.getItem("API_BASE") || ""; if(qs.get("api")) localStorage.setItem("API_BASE", API_BASE);
+const api = p => API_BASE + p;
+async function imageSolve(){
+ const f=document.getElementById('img').files[0];
+ if(!f){out.innerHTML='<div class="card">اختر صورة أولًا.</div>';return;}
+ out.innerHTML='<div class="card">📷 أقرأ المسألة والرسم وأحلها...</div>';
+ const fd=new FormData(); fd.append('file',f);
+ try{
+  const r=await fetch(api('/analyze-image'),{method:'POST',body:fd});
+  const d=await r.json();
+  out.innerHTML='<div class="card"><div class="answer">'+esc(d.answer)+'</div></div>';
+ }catch(e){out.innerHTML='<div class="card">حدث خطأ أثناء تحليل الصورة.</div>'}
+}
+
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+async function ask(){
+ const q=document.getElementById('q').value.trim(); if(!q)return;
+ out.innerHTML='<div class="card">🔎 أبحث في قاعدة المعرفة...</div>';
+ try{
+  const r=await fetch(api('/ask'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,top_k:8})});
+  const d=await r.json();
+  out.innerHTML='<div class="card"><div class="answer">'+esc(d.answer)+'</div></div>'+
+  '<div class="card"><h2>📚 المصادر</h2>'+d.sources.map(s=>
+  '<div class="source"><b>['+s.n+'] '+esc(s.title)+'</b> · '+esc(s.source)+' · '+esc(s.year||'')+
+  (s.url?' · <a target="_blank" href="'+esc(s.url)+'">فتح المصدر</a>':'')+'</div>').join('')+'</div>';
+ }catch(e){out.innerHTML='<div class="card">حدث خطأ في الاتصال بالخادم.</div>'}
+}
+</script></main></body></html>
